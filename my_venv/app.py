@@ -28,6 +28,22 @@ person_speed = 1
 pressed_key = 0
 events = {}
 
+foodGrow_size = 10
+foodGrow_vector = {}
+for f in range(1, 4):
+    foodGrowx = random.randint(0, screen_width)
+    foodGrowy = random.randint(0, screen_height)
+    foodGrow_vector["f" + str(f)] = {
+        "pos": [foodGrowx, foodGrowy],
+        "c": False,
+        "vector": {
+            "p1": [foodGrowx, foodGrowy],
+            "p2": [foodGrowx + foodGrow_size, foodGrowy],
+            "p3": [foodGrowx + foodGrow_size, foodGrowy + foodGrow_size],
+            "p4": [foodGrowx, foodGrowy + foodGrow_size]
+        }
+    }
+
 food_size = 10
 food_vector = {}
 for f in range(0, 3):
@@ -80,6 +96,25 @@ while running:
             if "right" in events:
                 person_pos_x -= person_speed
     
+    for fg in foodGrow_vector:
+        if (person["p1"][0] < foodGrow_vector[fg]["vector"]["p1"][0] + foodGrow_size and
+            person["p1"][0] + person_size > foodGrow_vector[fg]["vector"]["p1"][0] and
+            person["p1"][1] < foodGrow_vector[fg]["vector"]["p1"][1] + foodGrow_size and
+            person["p1"][1] + person_size > foodGrow_vector[fg]["vector"]["p1"][1] and
+            not foodGrow_vector[fg]["c"] == True
+        ):
+            foodGrow_vector[fg]["c"] = True
+            person_size += 5
+
+        if (
+            person["p1"][0] > foodGrow_vector[fg]["vector"]["p1"][0] + foodGrow_size or
+            person["p1"][0] + person_size < foodGrow_vector[fg]["vector"]["p1"][0] or
+            person["p1"][1] > foodGrow_vector[fg]["vector"]["p1"][1] + foodGrow_size or
+            person["p1"][1] + person_size < foodGrow_vector[fg]["vector"]["p1"][1] and
+            foodGrow_vector[fg]["c"] == True
+        ):
+            foodGrow_vector[fg]["c"] = False
+    
     #Verifica se o jogador atingiu ou passou dos limites da tela
     if person_pos_y < 0 or (person_pos_y + person_size) > screen_height or person_pos_x < 0 or (person_pos_x + person_size) > screen_width:
         if "up" in events:
@@ -122,6 +157,9 @@ while running:
     # Desenha a(s) comida(s)
     for i in food_vector:
         pygame.draw.rect(screen, (0, 255, 0), (food_vector[i]["pos"][0], food_vector[i]["pos"][1], food_size, food_size))
+
+    for i in foodGrow_vector:
+        pygame.draw.rect(screen, (255, 0, 0), (foodGrow_vector[i]["pos"][0], foodGrow_vector[i]["pos"][1], foodGrow_size, foodGrow_size))
 
     # Inicializando Fontes e renderizando na tela
     # pygame.font.init()
